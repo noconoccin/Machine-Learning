@@ -1,0 +1,17 @@
+For each possible value of k in k_choices (first loop per given k -> k in k_choices)
+	Set/Reset k accuracy dictionary\n
+	Run the k-nearest-neighbor algorithm num_folds times (second loop per fold -> i in num_folds)
+		Set/Reset train and test sets
+		Assign folds into either training or test set (third loop per fold assign to designated set -> j in num_folds)
+			Use either conditions or modulo for setting folds (batches) into test and others into train
+			Condition example:
+			if i == j, test = trainfold[j] else append train = trainfold[j] (let the loop take care of the rest)
+			Modulo example:
+			test = trainfold[i], train = trainfold[(i+1+j)%num_folds] (i+1 here is for skipping i value, j is to move, % to move around like round robin)
+			Remember to append train cause you might replace the values inside. In cv with fold 5, always 1 fold for test and the rest 4 folds for train.
+			Also, don't forget that you're not only getting the folds for X but also for the label y.
+
+		Train K Nearest Neighbor using train
+		Compute Euclidean Dist Matrix (don't compare the difference anymore)
+		Run K Nearest Neighbor pred for this test
+		Evaluate the prediction with correct  
