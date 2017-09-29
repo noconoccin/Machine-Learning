@@ -87,7 +87,8 @@ class LinearRegression(object):
             # X_batch = np.random.choice(X, batch_size)
             rand_idx = np.random.choice(num_train, batch_size)
             X_batch = X[rand_idx]
-            y_batch = y[rand_idx]
+			# y_batch = y[rand_idx]
+            y_batch = y[rand_idx].shape[0]
             #########################################################################
             #                             END OF YOUR CODE                          #
             #########################################################################
@@ -102,7 +103,9 @@ class LinearRegression(object):
             # stored in the grads dictionary defined above.                         #
             #########################################################################
 
-            self.params['W'] = learning_rate * grads
+            # self.params['W'] = learning_rate * grads
+            # self.params['W'] = learning_rate * grads['W']
+            self.params['W'] -= (1 / (2 * batch_size)) * learning_rate * grads['W']
             #########################################################################
             #                             END OF YOUR CODE                          #
             #########################################################################
@@ -155,8 +158,8 @@ class LinearRegression(object):
         # the gradient on W, and be a matrix of same size.                          #
         #############################################################################
         
-        
-        grads['W'] = np.dot(loss, X)
+        # gradient = np.dot(-X.T, loss)
+        grads['W'] = np.dot(-X.T, loss)
         
         #############################################################################
         #                              END OF YOUR CODE                             #
