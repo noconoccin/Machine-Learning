@@ -75,7 +75,6 @@ class LinearRegression(object):
 
         # Implement the initiaize_weights function.
         self.initialize_weights(dim)
-
         loss_history = []
         for it in range(num_iters):
 
@@ -103,9 +102,9 @@ class LinearRegression(object):
             # stored in the grads dictionary defined above.                         #
             #########################################################################
 
-            # self.params['W'] = learning_rate * grads
-            # self.params['W'] = learning_rate * grads['W']
-            self.params['W'] -= (1 / (2 * batch_size)) * learning_rate * grads['W']
+            # self.params['W'] -= learning_rate * grads['W']
+            # self.params['W'] = np.sum((X.dot(self.params['W']) - y_batch)**2) / (2 * batch_size)
+            self.params['W'] -= learning_rate * grads['W']
             #########################################################################
             #                             END OF YOUR CODE                          #
             #########################################################################
@@ -159,7 +158,7 @@ class LinearRegression(object):
         #############################################################################
         
         # gradient = np.dot(-X.T, loss)
-        grads['W'] = np.dot(-X.T, loss)
+        grads['W'] = np.dot(-X.T, loss) / N
         
         #############################################################################
         #                              END OF YOUR CODE                             #
