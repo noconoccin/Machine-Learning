@@ -1,7 +1,6 @@
 import numpy as np
 
 class LinearRegression(object):
-    num_samples = []
     def __init__(self):
         pass
 
@@ -23,7 +22,7 @@ class LinearRegression(object):
         # standard deviation determined by the parameter std_dev.                   #
         # Hint: Look up the function numpy.random.randn                             #
         #############################################################################
-        self.params['W'] = np.random.randn(dim, 1)
+        self.params['W'] = std_dev * np.random.randn(dim, 1) # sigma * np.random.randn(...) + mu
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################        
@@ -60,9 +59,13 @@ class LinearRegression(object):
             # TODO: Implement the analytical solution of the weight vector for linear   #
             # regression.                                                               #
             #############################################################################
-
-            self.params['W'] = np.dot(np.dot(np.linalg.inv(np.dot(X.T,X)),X.T),y)
             
+			# theta = (X^T * X) ^ -1 * X^T * y
+            # t = np.dot(X.T, X) ** -1
+            # t = np.dot(t, X.T)
+			# self.params['W'] = np.dot(t, y)
+            self.params['W'] = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(y)
+			
             #############################################################################
             #                              END OF YOUR CODE                             #
             #############################################################################
@@ -74,31 +77,34 @@ class LinearRegression(object):
         self.initialize_weights(dim)
         loss_history = []
         for it in range(num_iters):
-            
+
             #########################################################################
             # TODO: Create a random minibatch of training data and labels, storing  #
             # them in X_batch and y_batch respectively.                             #
             # Hint: Look up the function numpy.random.choice                        #
             #########################################################################
-            indices = np.random.choice(X.shape[0], batch_size)
-            X_batch = X[indices]
-            y_batch = y[indices]
-            #X_batch = np.append(X_2, X_2, axis=0)
+            # X_batch = np.random.choice(X, batch_size)
+            rand_idx = np.random.choice(num_train, batch_size)
+            X_batch = X[rand_idx]
+			# y_batch = y[rand_idx]
+            y_batch = y[rand_idx].shape[0]
             #########################################################################
             #                             END OF YOUR CODE                          #
             #########################################################################
+            
             loss, grads = self.loss(X_batch, y=y_batch)
             loss_history.append(np.squeeze(loss))
+
             #########################################################################
             # TODO: Use the gradients in the grads dictionary to update the         #
             # parameters of the model (stored in the dictionary self.params)        #
             # using stochastic gradient descent. You'll need to use the gradients   #
             # stored in the grads dictionary defined above.                         #
             #########################################################################
-            #b - learning_rate * error * x
-            #learning_rate_np = np.array([[learning_rate]])
-            self.params['W'] = self.params['W'] - learning_rate*grads['W']
-            #self.params['W'] - grads
+
+            # self.params['W'] -= learning_rate * grads['W']
+            # self.params['W'] = np.sum((X.dot(self.params['W']) - y_batch)**2) / (2 * batch_size)
+            self.params['W'] -= learning_rate * grads['W']
             #########################################################################
             #                             END OF YOUR CODE                          #
             #########################################################################
@@ -107,7 +113,7 @@ class LinearRegression(object):
 
         return loss_history
 
-    def loss(self, X, y):
+    def loss(self, X, y=None):
         """
         Compute the loss and gradients for an iteration of linear regression.
 
@@ -121,6 +127,7 @@ class LinearRegression(object):
         - grads: Dictionary mapping parameter names to gradients of those parameters
           with respect to the loss function; has the same keys as self.params.
         """
+        
         # Unpack variables from the params dictionary
         W = self.params['W']
         N, D = X.shape
@@ -137,7 +144,8 @@ class LinearRegression(object):
         #############################################################################
         # TODO: Compute for the loss.                                               #
         #############################################################################
-        loss = 0.5* np.mean(np.square((prediction-y)))
+        loss = 0.5 * np.mean(np.square((prediction - y)))
+        
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -149,10 +157,9 @@ class LinearRegression(object):
         # the gradient on W, and be a matrix of same size.                          #
         #############################################################################
         
-        grads['W'] = np.dot((prediction-y).T,X).T
-        #2*np.dot(loss, W.T)
-        #grads['W'] = np.dot(-X.Tloss)
-
+        # gradient = np.dot(-X.T, loss)
+        grads['W'] = np.dot((prediction-y).T, X).T
+        
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -178,14 +185,15 @@ class LinearRegression(object):
         # TODO: Compute for the predictions of the model on new data using the      #
         # learned weight vectors.                                                   #
         #############################################################################
-    
         prediction = np.dot(X, W)
+        #print(X.shape[0]) # num_test
+        #print(prediction.shape) # (num_test, 1)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
+    
         return prediction
 
-   
     def feature_transform(self,X):
         """
         Appends a vector of ones for the bias term.
@@ -202,12 +210,10 @@ class LinearRegression(object):
         # TODO: Append a vector of ones across the dimension of your input data.    #
         # This accounts for the bias or the constant in your hypothesis function.   #
         #############################################################################
-
-        f_transform = np.ones( (X.shape[0],X.shape[1]+1) )
-        
-        f_transform[:,:]=X
-        f_transform[:,1]=1.0
-        
+		# np.concatenate((np.ones((X.shape[0],1)),X),axis=1)
+        f_transform = np.ones((X.shape[0], 2)) # np.ones((128, 2))
+        f_transform[:,:-1] = X
+        print(f_transform.shape)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
