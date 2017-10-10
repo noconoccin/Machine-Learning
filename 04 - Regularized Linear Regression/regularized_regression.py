@@ -23,7 +23,7 @@ class RegularizedRegression(object):
         # standard deviation determined by the parameter std_dev.                   #
         # Hint: Look up the function numpy.random.randn                             #
         #############################################################################
-        self.params['W'] = np.random.randn(dim, 1)
+        self.params['W'] = std_dev*np.random.randn(dim, 1)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################        
@@ -78,7 +78,6 @@ class RegularizedRegression(object):
             # using stochastic gradient descent. You'll need to use the gradients   #
             # stored in the grads dictionary defined above.                         #
             #########################################################################
-
             self.params['W'] = self.params['W'] - learning_rate*grads['W']
             #########################################################################
             #                             END OF YOUR CODE                          #
@@ -113,7 +112,7 @@ class RegularizedRegression(object):
         # TODO: Compute for the prediction value given the current weight vector.   #
         # Store the result in the prediction variable                               #
         #############################################################################
-        prediction = np.dot(X, W)
+        prediction = np.dot(X, self.params['W'])
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -121,7 +120,7 @@ class RegularizedRegression(object):
         #############################################################################
         # TODO: Compute for the loss. Include the regularization term.              #
         #############################################################################
-        loss = 0.5* np.mean(np.square((prediction-y))) + (reg * 0.5) * np.sum(np.square(W))
+        loss = 0.5* np.mean(np.square((prediction-y))) + (reg*0.5)*np.sum(np.square(W)) 
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -133,7 +132,7 @@ class RegularizedRegression(object):
         # the gradient on W, and be a matrix of same size.                          #
         #############################################################################
         
-        grads['W'] = np.dot((prediction-y).T,X).T + reg * W
+        grads['W'] = np.dot((prediction-y).T,X).T + (reg*W)
         
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -181,26 +180,27 @@ class RegularizedRegression(object):
         - f_transform: A numpy array of shape (N, D + order + 1) representing the transformed
             features following the specified poly_order.
         """
-        
+        f_transform = None
 
         #############################################################################
         # TODO: Append a vector of ones across the dimension of your input data.    #
         # This accounts for the bias or the constant in your hypothesis function.   #
         #############################################################################
-        f_transform = np.ones((X.shape[0], X.shape[1]+poly_order)) 
-        
+        f_transform = np.ones( (X.shape[0],X.shape[1]+poly_order) )
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
-        
+        #print(X)
+        #rint(f_transform.shape)
+   
+        for i in range(poly_order+1):
+            f_transform[:,i:(i+1)]=X**i
+        #print(f_transform)
         #############################################################################
         # TODO: Transform your inputs to the corresponding polynomial with order    #
         # given by the parameter poly_order.                                        #
-        #############################################################################  
-        for i in range(poly_order + 1):
-            f_transform[:,i:(i+1)] = X ** i
-			
-        #print(f_transform)
+        #############################################################################           
+        
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
